@@ -1,16 +1,25 @@
 {
-  "name": "testes-fp",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "npx playwright test --project=firefox tests/checkout.spec.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@playwright/test": "^1.51.1",
-    "@types/node": "^22.13.17"
-  }
+	"name": "testes-fp",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "npx playwright test --project=firefox tests/checkout.spec.ts",
+		"test:checkout": "npx playwright test --project=firefox tests/checkout.spec.ts",
+		"test:all": "npx playwright test",
+		"lint": "npx biome lint",
+		"format": "npx biome format",
+		"check": "npx biome check --fix --unsafe"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@playwright/test": "^1.51.1",
+		"@types/node": "^22.13.17"
+	},
+	"dependencies": {
+		"dotenv": "^17.4.2"
+	}
 }
