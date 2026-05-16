@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { url, addToCartAndGoToCart } from "./utils";
+import { url, TEST_EMAIL, addToCartAndGoToCart } from "./utils";
 
 test("Deve preencher os dados e finalizar a compra", async ({ page }) => {
 	await addToCartAndGoToCart(page);
@@ -8,7 +8,7 @@ test("Deve preencher os dados e finalizar a compra", async ({ page }) => {
 	await expect(page).toHaveURL(`${url}/pagamento`);
 
 	await page.fill('[placeholder="Digite seu nome completo"]', "José Teste");
-	await page.fill('[placeholder="Digite seu e-mail"]', "teste@exemplo.com");
+	await page.fill('[placeholder="Digite seu e-mail"]', TEST_EMAIL);
 	await page.getByRole("button", { name: "Continuar" }).click();
 
 	await expect(page.getByText("Pagamento via PIX")).toBeVisible();
@@ -28,7 +28,7 @@ test("Deve preencher os dados, se increver na newsletter e finalizar a compra", 
 	await expect(page).toHaveURL(`${url}/pagamento`);
 
 	await page.fill('[placeholder="Digite seu nome completo"]', "Teste");
-	await page.fill('[placeholder="Digite seu e-mail"]', "teste@gmail.com");
+	await page.fill('[placeholder="Digite seu e-mail"]', TEST_EMAIL);
 	await page
 		.getByText("Inscreva-se na nossa newsletter para receber ofertas especiais")
 		.click();
@@ -73,7 +73,7 @@ test("Deve exibir erro ao tentar finalizar compra criando uma conta sem preenche
 	await expect(page).toHaveURL(`${url}/pagamento`);
 
 	await page.fill('[placeholder="Digite seu nome completo"]', "Teste");
-	await page.fill('[placeholder="Digite seu e-mail"]', "teste123@gmail.com");
+	await page.fill('[placeholder="Digite seu e-mail"]', TEST_EMAIL);
 	await page.getByText("Criar uma conta para um checkout mais rápido").click();
 	await page.getByRole("button", { name: "Continuar" }).click();
 	await expect(

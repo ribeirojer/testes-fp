@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { url } from "./utils";
+import { url, TEST_EMAIL, TEST_PASSWORD } from "./utils";
 
 test("Deve validar o campo nome", async ({ page }) => {
 	await page.goto(`${url}/cadastrar`);
@@ -32,7 +32,7 @@ test("Deve validar o campo senha", async ({ page }) => {
 	await page.goto(`${url}/cadastrar`);
 
 	await page.fill('[placeholder="Digite seu nome completo"]', "teste");
-	await page.fill('[placeholder="Digite seu email"]', "teste@gmail.com");
+	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
 	await page.fill('[placeholder="Digite sua senha"]', "");
 	await page.getByRole("button", { name: "Cadastrar" }).click();
 
@@ -52,8 +52,8 @@ test("Deve validar o campo confirmar senha", async ({ page }) => {
 	await page.goto(`${url}/cadastrar`);
 
 	await page.fill('[placeholder="Digite seu nome completo"]', "teste");
-	await page.fill('[placeholder="Digite seu email"]', "teste@gmail.com");
-	await page.fill('[placeholder="Digite sua senha"]', "Teste@1234");
+	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
+	await page.fill('[placeholder="Digite sua senha"]', TEST_PASSWORD);
 	await page.getByRole("button", { name: "Cadastrar" }).click();
 
 	await expect(page.getByText("Por favor confirme sua senha...")).toBeVisible();
@@ -70,8 +70,8 @@ test("Deve permitir cadastro de novo usuário", async ({ page }) => {
 
 	await page.fill('[placeholder="Digite seu nome completo"]', `Teste-${id}`);
 	await page.fill('[placeholder="Digite seu email"]', `teste${id}@gmail.com`);
-	await page.fill('[placeholder="Digite sua senha"]', "Teste@1234");
-	await page.fill('[placeholder="Confirme sua senha"]', "Teste@1234");
+	await page.fill('[placeholder="Digite sua senha"]', TEST_PASSWORD);
+	await page.fill('[placeholder="Confirme sua senha"]', TEST_PASSWORD);
 
 	await page.getByRole("button", { name: "Cadastrar" }).click();
 

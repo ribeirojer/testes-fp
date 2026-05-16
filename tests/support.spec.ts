@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { url } from "./utils";
+import { url, TEST_EMAIL } from "./utils";
 
 test("Deve validar o campo de nome", async ({ page }) => {
 	await page.goto(`${url}/contato`);
 
-	await page.fill('[placeholder="Digite seu email"]', "teste@exemplo.com");
+	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
 	await page.fill(
 		'[placeholder="Digite sua mensagem aqui"]',
 		"Tenho um problema com minha compra.",
@@ -47,7 +47,7 @@ test("Deve validar o campo de mensagem", async ({ page }) => {
 	await page.goto(`${url}/contato`);
 
 	await page.fill('[placeholder="Digite seu nome"]', "Teste");
-	await page.fill('[placeholder="Digite seu email"]', "teste@exemplo.com");
+	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
 
 	await page.getByText("Enviar mensagem").click();
 
@@ -58,7 +58,7 @@ test("Deve permitir envio de mensagem pelo suporte", async ({ page }) => {
 	await page.goto(`${url}/contato`);
 
 	await page.fill('[placeholder="Digite seu nome"]', "Teste");
-	await page.fill('[placeholder="Digite seu email"]', "teste@exemplo.com");
+	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
 	await page.fill(
 		'[placeholder="Digite sua mensagem aqui"]',
 		"Tenho um problema com minha compra.",

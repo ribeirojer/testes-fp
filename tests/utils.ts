@@ -1,5 +1,9 @@
+import path from "node:path";
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import dotenv from "dotenv";
+
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
 
 export const url =
 	process.env.BASE_URL || "https://flashcards-premium.vercel.app";

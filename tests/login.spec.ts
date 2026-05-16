@@ -24,7 +24,7 @@ test("Deve exibir erro para credenciais inválidas", async ({ page }) => {
 	await page.fill('[placeholder="Digite seu email"]', "teste@gmail");
 	await page.getByRole("button", { name: "Entrar" }).click();
 
-	await page.fill('[placeholder="Digite seu email"]', "teste@gmail.com");
+	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
 	await page.fill('[placeholder="Digite sua senha"]', "");
 	await page.getByRole("button", { name: "Entrar" }).click();
 

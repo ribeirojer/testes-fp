@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { url } from "./utils";
+import { url, TEST_EMAIL } from "./utils";
 
 test("Deve validar o campo email", async ({ page }) => {
 	await page.goto(url);
@@ -24,7 +24,7 @@ test("Deve validar o campo email", async ({ page }) => {
 test("Deve se inscrever na newsletter", async ({ page }) => {
 	await page.goto(url);
 
-	await page.fill('[placeholder="voce@exemplo.com"]', "teste@exemplo.com");
+	await page.fill('[placeholder="voce@exemplo.com"]', TEST_EMAIL);
 	await page.click('[for="terms"]');
 
 	await page.getByText("Inscreva-se na Newsletter").click();
