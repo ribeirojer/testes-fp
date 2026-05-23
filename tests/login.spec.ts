@@ -1,41 +1,34 @@
-import { expect, test } from "@playwright/test";
-import { url, TEST_EMAIL, TEST_PASSWORD } from "./utils";
+import { test } from "@playwright/test";
+import { LoginPage } from "./pages/login.page";
+import { TEST_EMAIL, TEST_PASSWORD } from "./utils";
 
-test("Deve permitir login do usuário", async ({ page }) => {
-	await page.goto(`${url}/entrar`);
+test.describe("Login @auth", () => {
+	test("Deve permitir login do usuário @smoke", async ({ page }) => {
+		const loginPage = new LoginPage(page);
+		await loginPage.goto();
+		await loginPage.login(TEST_EMAIL, TEST_PASSWORD);
+		await loginPage.expectSuccess();
+	});
 
-	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
-	await page.fill('[placeholder="Digite sua senha"]', TEST_PASSWORD);
+	test("Deve exibir erro para credenciais inválidas", async ({ page }) => {
+		const loginPage = new LoginPage(page);
+		await loginPage.goto();
 
-	await page.click('[type="submit"]');
+		await loginPage.login("", TEST_PASSWORD);
+		await loginPage.expectError("Por favor digite seu e-mail...");
 
-	await expect(page).toHaveURL(url);
-	await expect(page.locator('[href="/perfil"]')).toBeVisible();
-});
+		await loginPage.login("teste@gmail", TEST_PASSWORD);
+		await loginPage.expectError("Por favor digite um e-mail válido...");
 
-test("Deve exibir erro para credenciais inválidas", async ({ page }) => {
-	await page.goto(`${url}/entrar`);
+		await loginPage.emailInput.fill(TEST_EMAIL);
+		await loginPage.passwordInput.fill("");
+		await loginPage.submitButton.click();
+		await loginPage.expectError("Por favor digite sua senha...");
 
-	await page.fill('[placeholder="Digite seu email"]', "");
-	await page.getByRole("button", { name: "Entrar" }).click();
-
-	await expect(page.getByText("Por favor digite seu e-mail...")).toBeVisible();
-
-	await page.fill('[placeholder="Digite seu email"]', "teste@gmail");
-	await page.getByRole("button", { name: "Entrar" }).click();
-
-	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
-	await page.fill('[placeholder="Digite sua senha"]', "");
-	await page.getByRole("button", { name: "Entrar" }).click();
-
-	await expect(page.getByText("Por favor digite sua senha...")).toBeVisible();
-
-	await page.fill('[placeholder="Digite sua senha"]', "123");
-	await page.getByRole("button", { name: "Entrar" }).click();
-
-	await expect(
-		page.getByText(
+		await loginPage.passwordInput.fill("123");
+		await loginPage.submitButton.click();
+		await loginPage.expectError(
 			"Por favor digite um senha mais forte... (8 caracteres, 1 letra maiúscula, 1 número e 1 símbolo)",
-		),
-	).toBeVisible();
+		);
+	});
 });

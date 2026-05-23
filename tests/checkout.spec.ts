@@ -1,90 +1,94 @@
 import { expect, test } from "@playwright/test";
-import { url, TEST_EMAIL, addToCartAndGoToCart } from "./utils";
+import { CartPage } from "./pages/cart.page";
+import { CheckoutPage } from "./pages/checkout.page";
+import { TEST_EMAIL } from "./utils";
 
-test("Deve preencher os dados e finalizar a compra", async ({ page }) => {
-	await addToCartAndGoToCart(page);
+test.describe("Checkout @checkout", () => {
+	test("Deve preencher os dados e finalizar a compra @smoke", async ({
+		page,
+	}) => {
+		const cartPage = new CartPage(page);
+		const checkoutPage = new CheckoutPage(page);
 
-	await page.getByText("Finalizar Compra").first().click();
-	await expect(page).toHaveURL(`${url}/pagamento`);
+		await cartPage.addFirstDeckToCartAndGo();
+		await cartPage.goToCheckout();
+		await expect(page).toHaveURL("/pagamento");
 
-	await page.fill('[placeholder="Digite seu nome completo"]', "José Teste");
-	await page.fill('[placeholder="Digite seu e-mail"]', TEST_EMAIL);
-	await page.getByRole("button", { name: "Continuar" }).click();
+		await checkoutPage.fillCustomerInfo("José Teste", TEST_EMAIL);
+		await checkoutPage.continue();
 
-	await expect(page.getByText("Pagamento via PIX")).toBeVisible();
-	await expect(
-		page.getByText(
-			"Escaneie o QR Code ou copie a chave PIX para realizar o pagamento:",
-		),
-	).toBeVisible();
-});
+		await checkoutPage.expectPixPaymentVisible();
+		await expect(
+			page.getByText(
+				"Escaneie o QR Code ou copie a chave PIX para realizar o pagamento:",
+			),
+		).toBeVisible();
+	});
 
-test("Deve preencher os dados, se increver na newsletter e finalizar a compra", async ({
-	page,
-}) => {
-	await addToCartAndGoToCart(page);
+	test("Deve preencher os dados, se increver na newsletter e finalizar a compra", async ({
+		page,
+	}) => {
+		const cartPage = new CartPage(page);
+		const checkoutPage = new CheckoutPage(page);
 
-	await page.getByText("Finalizar Compra").first().click();
-	await expect(page).toHaveURL(`${url}/pagamento`);
+		await cartPage.addFirstDeckToCartAndGo();
+		await cartPage.goToCheckout();
+		await expect(page).toHaveURL("/pagamento");
 
-	await page.fill('[placeholder="Digite seu nome completo"]', "Teste");
-	await page.fill('[placeholder="Digite seu e-mail"]', TEST_EMAIL);
-	await page
-		.getByText("Inscreva-se na nossa newsletter para receber ofertas especiais")
-		.click();
-	await page.getByRole("button", { name: "Continuar" }).click();
+		await checkoutPage.fillCustomerInfo("Teste", TEST_EMAIL);
+		await checkoutPage.subscribeToNewsletter();
+		await checkoutPage.continue();
 
-	await expect(page.getByText("Pagamento via PIX")).toBeVisible();
-	await expect(
-		page.getByText(
-			"Escaneie o QR Code ou copie a chave PIX para realizar o pagamento:",
-		),
-	).toBeVisible();
-});
+		await checkoutPage.expectPixPaymentVisible();
+		await expect(
+			page.getByText(
+				"Escaneie o QR Code ou copie a chave PIX para realizar o pagamento:",
+			),
+		).toBeVisible();
+	});
 
-test("Deve exibir erro ao tentar finalizar compra sem preencher os campos", async ({
-	page,
-}) => {
-	await addToCartAndGoToCart(page);
+	test("Deve exibir erro ao tentar finalizar compra sem preencher os campos", async ({
+		page,
+	}) => {
+		const cartPage = new CartPage(page);
+		const checkoutPage = new CheckoutPage(page);
 
-	await page.getByText("Finalizar Compra").first().click();
-	await expect(page).toHaveURL(`${url}/pagamento`);
+		await cartPage.addFirstDeckToCartAndGo();
+		await cartPage.goToCheckout();
+		await expect(page).toHaveURL("/pagamento");
 
-	await page.fill('[placeholder="Digite seu nome completo"]', "");
-	await page.fill('[placeholder="Digite seu e-mail"]', "");
-	await page.getByRole("button", { name: "Continuar" }).click();
-	await expect(page.getByText("Nome completo é obrigatório")).toBeVisible();
+		await checkoutPage.fillCustomerInfo("", "");
+		await checkoutPage.continue();
+		await checkoutPage.expectError("Nome completo é obrigatório");
 
-	await page.fill('[placeholder="Digite seu nome completo"]', "Teste");
-	await page.getByRole("button", { name: "Continuar" }).click();
-	await expect(page.getByText("Email é obrigatório")).toBeVisible();
+		await checkoutPage.fillCustomerInfo("Teste", "");
+		await checkoutPage.continue();
+		await checkoutPage.expectError("Email é obrigatório");
 
-	await page.fill('[placeholder="Digite seu e-mail"]', "teste");
-	await page.getByRole("button", { name: "Continuar" }).click();
-	await expect(page.getByText("Email inválido")).toBeVisible();
-});
+		await checkoutPage.fillCustomerInfo("Teste", "teste");
+		await checkoutPage.continue();
+		await checkoutPage.expectError("Email inválido");
+	});
 
-test("Deve exibir erro ao tentar finalizar compra criando uma conta sem preencher os campos", async ({
-	page,
-}) => {
-	await addToCartAndGoToCart(page);
+	test("Deve exibir erro ao tentar finalizar compra criando uma conta sem preencher os campos", async ({
+		page,
+	}) => {
+		const cartPage = new CartPage(page);
+		const checkoutPage = new CheckoutPage(page);
 
-	await page.getByText("Finalizar Compra").first().click();
-	await expect(page).toHaveURL(`${url}/pagamento`);
+		await cartPage.addFirstDeckToCartAndGo();
+		await cartPage.goToCheckout();
+		await expect(page).toHaveURL("/pagamento");
 
-	await page.fill('[placeholder="Digite seu nome completo"]', "Teste");
-	await page.fill('[placeholder="Digite seu e-mail"]', TEST_EMAIL);
-	await page.getByText("Criar uma conta para um checkout mais rápido").click();
-	await page.getByRole("button", { name: "Continuar" }).click();
-	await expect(
-		page.getByText("Senha é obrigatória para criar conta"),
-	).toBeVisible();
+		await checkoutPage.fillCustomerInfo("Teste", TEST_EMAIL);
+		await checkoutPage.createAccount();
+		await checkoutPage.continue();
+		await checkoutPage.expectError("Senha é obrigatória para criar conta");
 
-	await page.fill('[placeholder="Digite uma senha"]', "teste123");
-	await page.getByRole("button", { name: "Continuar" }).click();
-	await expect(
-		page.getByText(
+		await checkoutPage.fillPassword("teste123");
+		await checkoutPage.continue();
+		await checkoutPage.expectError(
 			"Senha deve ter pelo menos 8 caracteres, incluindo letras, números e símbolos",
-		),
-	).toBeVisible();
+		);
+	});
 });

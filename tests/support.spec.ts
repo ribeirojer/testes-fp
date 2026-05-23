@@ -1,70 +1,75 @@
-import { expect, test } from "@playwright/test";
-import { url, TEST_EMAIL } from "./utils";
+import { test } from "@playwright/test";
+import { SupportPage } from "./pages/support.page";
+import { TEST_EMAIL } from "./utils";
 
-test("Deve validar o campo de nome", async ({ page }) => {
-	await page.goto(`${url}/contato`);
+test.describe("Suporte @support", () => {
+	test("Deve validar o campo de nome", async ({ page }) => {
+		const supportPage = new SupportPage(page);
+		await supportPage.goto();
 
-	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
-	await page.fill(
-		'[placeholder="Digite sua mensagem aqui"]',
-		"Tenho um problema com minha compra.",
-	);
+		await supportPage.fillContactForm(
+			"",
+			TEST_EMAIL,
+			"Tenho um problema com minha compra.",
+		);
+		await supportPage.submit();
+		await supportPage.expectError("Por favor, digite seu nome.");
 
-	await page.getByText("Enviar mensagem").click();
+		await supportPage.fillContactForm(
+			"ed",
+			TEST_EMAIL,
+			"Tenho um problema com minha compra.",
+		);
+		await supportPage.submit();
+		await supportPage.expectError(
+			"O campo Nome deve ter entre 3 e 50 caracteres.",
+		);
+	});
 
-	await expect(page.getByText("Por favor, digite seu nome.")).toBeVisible();
+	test("Deve validar o campo de email", async ({ page }) => {
+		const supportPage = new SupportPage(page);
+		await supportPage.goto();
 
-	await page.fill('[placeholder="Digite seu nome"]', "ed");
-	await page.getByText("Enviar mensagem").click();
+		await supportPage.fillContactForm(
+			"Teste",
+			"",
+			"Tenho um problema com minha compra.",
+		);
+		await supportPage.submit();
+		await supportPage.expectError("Por favor, digite seu email.");
 
-	await expect(
-		page.getByText("O campo Nome deve ter entre 3 e 50 caracteres."),
-	).toBeVisible();
-});
+		await supportPage.fillContactForm(
+			"Teste",
+			"XXX@xxx",
+			"Tenho um problema com minha compra.",
+		);
+		await supportPage.submit();
+		await supportPage.expectError(
+			"O campo Email não possui um formato válido.",
+		);
+	});
 
-test("Deve validar o campo de email", async ({ page }) => {
-	await page.goto(`${url}/contato`);
+	test("Deve validar o campo de mensagem", async ({ page }) => {
+		const supportPage = new SupportPage(page);
+		await supportPage.goto();
 
-	await page.fill('[placeholder="Digite seu nome"]', "Teste");
-	await page.fill(
-		'[placeholder="Digite sua mensagem aqui"]',
-		"Tenho um problema com minha compra.",
-	);
+		await supportPage.fillContactForm("Teste", TEST_EMAIL, "");
+		await supportPage.submit();
+		await supportPage.expectError("Por favor, digite sua mensagem.");
+	});
 
-	await page.getByText("Enviar mensagem").click();
+	test("Deve permitir envio de mensagem pelo suporte @smoke", async ({
+		page,
+	}) => {
+		const supportPage = new SupportPage(page);
+		await supportPage.goto();
 
-	await expect(page.getByText("Por favor, digite seu email.")).toBeVisible();
-
-	await page.fill('[placeholder="Digite seu email"]', "XXX@xxx");
-	await page.getByText("Enviar mensagem").click();
-
-	await expect(
-		page.getByText("O campo Email não possui um formato válido."),
-	).toBeVisible();
-});
-
-test("Deve validar o campo de mensagem", async ({ page }) => {
-	await page.goto(`${url}/contato`);
-
-	await page.fill('[placeholder="Digite seu nome"]', "Teste");
-	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
-
-	await page.getByText("Enviar mensagem").click();
-
-	await expect(page.getByText("Por favor, digite sua mensagem.")).toBeVisible();
-});
-
-test("Deve permitir envio de mensagem pelo suporte", async ({ page }) => {
-	await page.goto(`${url}/contato`);
-
-	await page.fill('[placeholder="Digite seu nome"]', "Teste");
-	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
-	await page.fill(
-		'[placeholder="Digite sua mensagem aqui"]',
-		"Tenho um problema com minha compra.",
-	);
-
-	await page.getByText("Enviar mensagem").click();
-
-	await expect(page.getByText("Mensagem enviada!")).toBeVisible();
+		await supportPage.fillContactForm(
+			"Teste",
+			TEST_EMAIL,
+			"Tenho um problema com minha compra.",
+		);
+		await supportPage.submit();
+		await supportPage.expectSuccess();
+	});
 });

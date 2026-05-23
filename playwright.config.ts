@@ -8,16 +8,22 @@ const BASE_URL =
 	process.env.BASE_URL || "https://flashcards-premium.vercel.app";
 
 export default defineConfig({
-	timeout: 120_000,
 	testDir: "./tests",
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 1 : undefined,
-	reporter: "html",
+	reporter: [["html"], ["list"]],
+	timeout: 60_000,
+	expect: {
+		timeout: 10_000,
+	},
 	use: {
 		baseURL: BASE_URL,
+		actionTimeout: 15_000,
+		navigationTimeout: 30_000,
 		trace: "on-first-retry",
+		screenshot: "only-on-failure",
 	},
 
 	projects: [

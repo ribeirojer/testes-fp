@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "npx playwright test --project=firefox tests/checkout.spec.ts",
+		"test": "npx playwright test --project=firefox tests/cart.spec.ts",
 		"test:checkout": "npx playwright test --project=firefox tests/checkout.spec.ts",
 		"test:all": "npx playwright test",
 		"lint": "npx biome lint",

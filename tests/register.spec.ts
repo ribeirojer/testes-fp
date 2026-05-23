@@ -1,79 +1,60 @@
-import { expect, test } from "@playwright/test";
-import { url, TEST_EMAIL, TEST_PASSWORD } from "./utils";
+import { test } from "@playwright/test";
+import { RegisterPage } from "./pages/register.page";
+import { TEST_EMAIL, TEST_PASSWORD } from "./utils";
 
-test("Deve validar o campo nome", async ({ page }) => {
-	await page.goto(`${url}/cadastrar`);
+test.describe("Registro @auth", () => {
+	test("Deve validar o campo nome", async ({ page }) => {
+		const registerPage = new RegisterPage(page);
+		await registerPage.goto();
+		await registerPage.register("", TEST_EMAIL, TEST_PASSWORD);
+		await registerPage.expectError("Por favor digite seu nome...");
+	});
 
-	await page.fill('[placeholder="Digite seu nome completo"]', "");
-	await page.getByRole("button", { name: "Cadastrar" }).click();
+	test("Deve validar o campo email", async ({ page }) => {
+		const registerPage = new RegisterPage(page);
+		await registerPage.goto();
 
-	await expect(page.getByText("Por favor digite seu nome...")).toBeVisible();
-});
+		await registerPage.register("teste", "", TEST_PASSWORD);
+		await registerPage.expectError("Por favor digite seu e-mail...");
 
-test("Deve validar o campo email", async ({ page }) => {
-	await page.goto(`${url}/cadastrar`);
+		await registerPage.register("teste", "teste@gmail", TEST_PASSWORD);
+		await registerPage.expectError("Por favor digite um e-mail válido...");
+	});
 
-	await page.fill('[placeholder="Digite seu nome completo"]', "teste");
-	await page.fill('[placeholder="Digite seu email"]', "");
+	test("Deve validar o campo senha", async ({ page }) => {
+		const registerPage = new RegisterPage(page);
+		await registerPage.goto();
 
-	await page.getByRole("button", { name: "Cadastrar" }).click();
+		await registerPage.register("teste", TEST_EMAIL, "");
+		await registerPage.expectError("Por favor digite sua senha...");
 
-	await expect(page.getByText("Por favor digite seu e-mail...")).toBeVisible();
-
-	await page.fill('[placeholder="Digite seu email"]', "teste@gmail");
-	await page.getByRole("button", { name: "Cadastrar" }).click();
-
-	await expect(
-		page.getByText("Por favor digite um e-mail válido..."),
-	).toBeVisible();
-});
-
-test("Deve validar o campo senha", async ({ page }) => {
-	await page.goto(`${url}/cadastrar`);
-
-	await page.fill('[placeholder="Digite seu nome completo"]', "teste");
-	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
-	await page.fill('[placeholder="Digite sua senha"]', "");
-	await page.getByRole("button", { name: "Cadastrar" }).click();
-
-	await expect(page.getByText("Por favor digite sua senha...")).toBeVisible();
-
-	await page.fill('[placeholder="Digite sua senha"]', "123");
-	await page.getByRole("button", { name: "Cadastrar" }).click();
-
-	await expect(
-		page.getByText(
+		await registerPage.register("teste", TEST_EMAIL, "123");
+		await registerPage.expectError(
 			"Por favor digite um senha mais forte... (8 caracteres, 1 letra maiúscula, 1 número e 1 símbolo)",
-		),
-	).toBeVisible();
-});
+		);
+	});
 
-test("Deve validar o campo confirmar senha", async ({ page }) => {
-	await page.goto(`${url}/cadastrar`);
+	test("Deve validar o campo confirmar senha", async ({ page }) => {
+		const registerPage = new RegisterPage(page);
+		await registerPage.goto();
 
-	await page.fill('[placeholder="Digite seu nome completo"]', "teste");
-	await page.fill('[placeholder="Digite seu email"]', TEST_EMAIL);
-	await page.fill('[placeholder="Digite sua senha"]', TEST_PASSWORD);
-	await page.getByRole("button", { name: "Cadastrar" }).click();
+		await registerPage.register("teste", TEST_EMAIL, TEST_PASSWORD, "");
+		await registerPage.expectError("Por favor confirme sua senha...");
 
-	await expect(page.getByText("Por favor confirme sua senha...")).toBeVisible();
+		await registerPage.register("teste", TEST_EMAIL, TEST_PASSWORD, "Senha123");
+		await registerPage.expectError("As senhas não coincidem...");
+	});
 
-	await page.fill('[placeholder="Confirme sua senha"]', "Senha123");
-	await page.getByRole("button", { name: "Cadastrar" }).click();
+	test("Deve permitir cadastro de novo usuário", async ({ page }) => {
+		const registerPage = new RegisterPage(page);
+		await registerPage.goto();
+		const id = Math.floor(Math.random() * 1000000);
 
-	await expect(page.getByText("As senhas não coincidem...")).toBeVisible();
-});
-
-test("Deve permitir cadastro de novo usuário", async ({ page }) => {
-	await page.goto(`${url}/cadastrar`);
-	const id = Math.floor(Math.random() * 1000000);
-
-	await page.fill('[placeholder="Digite seu nome completo"]', `Teste-${id}`);
-	await page.fill('[placeholder="Digite seu email"]', `teste${id}@gmail.com`);
-	await page.fill('[placeholder="Digite sua senha"]', TEST_PASSWORD);
-	await page.fill('[placeholder="Confirme sua senha"]', TEST_PASSWORD);
-
-	await page.getByRole("button", { name: "Cadastrar" }).click();
-
-	await expect(page.getByText("Email de confirmação enviado!")).toBeVisible();
+		await registerPage.register(
+			`Teste-${id}`,
+			TEST_EMAIL,
+			TEST_PASSWORD,
+		);
+		await registerPage.expectSuccess();
+	});
 });

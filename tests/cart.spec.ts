@@ -1,129 +1,95 @@
 import { expect, test } from "@playwright/test";
-import { url, addToCart, addToCartAndGoToCart } from "./utils";
+import { CartPage } from "./pages/cart.page";
 
-test("Deve exibir mensagem ao adicionar um deck ao carrinho", async ({
-	page,
-}) => {
-	await addToCart(page);
+test.describe("Carrinho @cart", () => {
+	test("Deve exibir mensagem ao adicionar um deck ao carrinho", async ({
+		page,
+	}) => {
+		const cartPage = new CartPage(page);
+		await cartPage.addFirstDeckToCart();
 
-	await expect(
-		page.getByText("Você pode continuar comprando ou ir para o carrinho."),
-	).toBeVisible();
-});
+		await expect(
+			page.getByText("Você pode continuar comprando ou ir para o carrinho."),
+		).toBeVisible();
+	});
 
-test("Deve exibir itens no carrinho", async ({ page }) => {
-	await page.goto(url);
+	test("Deve exibir itens no carrinho", async ({ page }) => {
+		const cartPage = new CartPage(page);
+		await cartPage.addTwoDecksToCart();
 
-	await page.getByText("Adicionar ao Carrinho").first().click();
-	await expect(page.getByText("Produto adicionado!").first()).toBeVisible();
+		await cartPage.expectItemVisible("JavaScript Essencial: Do Zero ao DOM");
+		await cartPage.expectItemVisible(
+			"Rust: Programação de Sistemas Segura e Eficiente",
+		);
+	});
 
-	await page.getByText("Adicionar ao Carrinho").nth(1).click();
-	await expect(page.getByText("Produto adicionado!").nth(2)).toBeVisible();
+	test("Deve permitir a remoção de um item do carrinho", async ({ page }) => {
+		const cartPage = new CartPage(page);
+		await cartPage.addFirstDeckToCartAndGo();
 
-	await page.getByText("Produto adicionado!").first().click();
-	await expect(page).toHaveURL(`${url}/carrinho`);
+		await cartPage.expectItemVisible("JavaScript Essencial: Do Zero ao DOM");
 
-	await expect(
-		page.getByText("JavaScript Essencial: Do Zero ao DOM").first(),
-	).toBeVisible();
-	await expect(
-		page.getByText("Rust: Programação de Sistemas Segura e Eficiente").first(),
-	).toBeVisible();
-});
+		await cartPage.removeFirstItem();
+		await cartPage.expectItemNotVisible("JavaScript Essencial: Do Zero ao DOM");
+		await cartPage.expectEmptyCart();
+		await expect(
+			page.getByText("Adicione alguns decks de flashcards para começar!"),
+		).toBeVisible();
+		await expect(page.getByText("Explorar Flashcards")).toBeVisible();
+	});
 
-test("Deve permitir a remoção de um item do carrinho", async ({ page }) => {
-	await addToCartAndGoToCart(page);
+	test("Deve permitir ir para o checkout", async ({ page }) => {
+		const cartPage = new CartPage(page);
+		await cartPage.addFirstDeckToCartAndGo();
 
-	await expect(
-		page.getByText("JavaScript Essencial: Do Zero ao DOM").first(),
-	).toBeVisible();
+		await cartPage.expectItemVisible("JavaScript Essencial: Do Zero ao DOM");
 
-	await expect(page.getByText("Remover").first()).toBeVisible();
-	await page.getByText("Remover").first().click();
+		await cartPage.goToCheckout();
+		await expect(page).toHaveURL("/pagamento");
+	});
 
-	await expect(
-		page.getByText("JavaScript Essencial: Do Zero ao DOM").first(),
-	).not.toBeVisible();
+	test("Deve permitir aplicar um cupom de desconto", async ({ page }) => {
+		const cartPage = new CartPage(page);
+		await cartPage.addFirstDeckToCartAndGo();
 
-	await expect(page.getByText("Seu carrinho está vazio")).toBeVisible();
-	await expect(
-		page.getByText("Adicione alguns decks de flashcards para começar!"),
-	).toBeVisible();
-	await expect(page.getByText("Explorar Flashcards")).toBeVisible();
-});
+		await cartPage.expectItemVisible("JavaScript Essencial: Do Zero ao DOM");
 
-test("Deve permitir ir para o checkout", async ({ page }) => {
-	await addToCartAndGoToCart(page);
+		await expect(page.getByText("Cupom de Desconto").first()).toBeVisible();
+		await cartPage.applyCoupon("WELCOME10");
+		await cartPage.expectCouponApplied();
+		await expect(page.getByText("R$ 29,99").nth(1)).toBeVisible();
+		await expect(page.getByText("-R$ 3,00")).toBeVisible();
+		await expect(page.getByText("R$ 26,99")).toBeVisible();
+	});
 
-	await expect(
-		page.getByText("JavaScript Essencial: Do Zero ao DOM").first(),
-	).toBeVisible();
+	test("Deve negar aplicar um cupom de desconto inválido", async ({ page }) => {
+		const cartPage = new CartPage(page);
+		await cartPage.addFirstDeckToCartAndGo();
 
-	await page.getByText("Finalizar Compra").first().click();
-	await expect(page).toHaveURL(`${url}/pagamento`);
-});
+		await cartPage.expectItemVisible("JavaScript Essencial: Do Zero ao DOM");
 
-test("Deve permitir aplicar um cupom de desconto", async ({ page }) => {
-	await addToCartAndGoToCart(page);
+		await expect(page.getByText("Cupom de Desconto").first()).toBeVisible();
 
-	await expect(
-		page.getByText("JavaScript Essencial: Do Zero ao DOM").first(),
-	).toBeVisible();
+		await cartPage.applyCoupon("WELCOME");
+		await cartPage.expectCouponError();
+	});
 
-	await expect(page.getByText("Cupom de Desconto").first()).toBeVisible();
-	await page.getByPlaceholder("Digite o cupom de desconto").fill("WELCOME10");
+	test.skip("Deve permitir remover um cupom de desconto", async ({ page }) => {
+		const cartPage = new CartPage(page);
+		await cartPage.addFirstDeckToCartAndGo();
 
-	await page.getByText("Aplicar").first().click();
+		await cartPage.expectItemVisible("JavaScript Essencial: Do Zero ao DOM");
 
-	await expect(
-		page.getByText("Cupom de desconto aplicado com sucesso!"),
-	).toBeVisible();
-	await expect(page.getByText("R$ 29,99").nth(1)).toBeVisible();
-	await expect(page.getByText("-R$ 3,00")).toBeVisible();
-	await expect(page.getByText("R$ 26,99")).toBeVisible();
-});
+		await expect(page.getByText("Cupom de Desconto").first()).toBeVisible();
+		await cartPage.applyCoupon("WELCOME10");
+		await cartPage.expectCouponApplied();
+		await expect(page.getByText("R$ 29, 99")).toBeVisible();
+		await expect(page.getByText("-R$ 3, 00")).toBeVisible();
+		await expect(page.getByText("R$ 26, 99")).toBeVisible();
 
-test("Deve negar aplicar um cupom de desconto inválido", async ({ page }) => {
-	await addToCartAndGoToCart(page);
-
-	await expect(
-		page.getByText("JavaScript Essencial: Do Zero ao DOM").first(),
-	).toBeVisible();
-
-	await expect(page.getByText("Cupom de Desconto").first()).toBeVisible();
-
-	await page.getByPlaceholder("Digite o cupom de desconto").fill("WELCOME");
-	await page.getByText("Aplicar").first().click();
-
-	await expect(
-		page.getByText("Erro ao validar cupom. Tente novamente.").first(),
-	).toBeVisible();
-});
-
-test.skip("Deve permitir remover um cupom de desconto", async ({ page }) => {
-	await addToCartAndGoToCart(page);
-
-	await expect(
-		page.getByText("JavaScript Essencial: Do Zero ao DOM").first(),
-	).toBeVisible();
-
-	await expect(page.getByText("Cupom de Desconto").first()).toBeVisible();
-	await page.getByPlaceholder("Digite o cupom de desconto").fill("WELCOME10");
-
-	await page.getByText("Aplicar").first().click();
-
-	await expect(
-		page.getByText("Cupom de desconto aplicado com sucesso!"),
-	).toBeVisible();
-	await expect(page.getByText("R$ 29, 99")).toBeVisible();
-	await expect(page.getByText("-R$ 3, 00")).toBeVisible();
-	await expect(page.getByText("R$ 26, 99")).toBeVisible();
-
-	await page.getByText("Remover").first().click();
-
-	await expect(
-		page.getByText("Cupom de desconto removido com sucesso!"),
-	).toBeVisible();
-	await expect(page.getByText("R$ 29, 99")).toBeVisible();
-	await expect(page.getByText("R$ 29, 99")).toBeVisible();
+		await cartPage.removeFirstItem();
+		await cartPage.expectCouponRemoved();
+		await expect(page.getByText("R$ 29, 99")).toBeVisible();
+		await expect(page.getByText("R$ 29, 99")).toBeVisible();
+	});
 });
