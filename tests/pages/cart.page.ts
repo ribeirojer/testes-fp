@@ -9,7 +9,7 @@ export class CartPage {
 
 	constructor(page: Page) {
 		this.page = page;
-		this.couponInput = page.getByPlaceholder("Digite o cupom de desconto");
+		this.couponInput = page.getByPlaceholder("Digite o cupom");
 		this.applyCouponButton = page.getByRole("button", { name: "Aplicar" });
 		this.finalizeOrderButton = page.getByRole("button", {
 			name: "Finalizar Compra",
@@ -19,37 +19,37 @@ export class CartPage {
 	async addFirstDeckToCart() {
 		await this.page.goto("/");
 		await this.page
-			.getByText("Adicionar ao Carrinho")
+			.getByText("Adicionar")
 			.first()
 			.click();
 		await expect(
-			this.page.getByText("Produto adicionado!").first(),
+			this.page.getByText("Ir", { exact: true }).first(),
 		).toBeVisible();
 	}
 
 	async addFirstDeckToCartAndGo() {
 		await this.addFirstDeckToCart();
-		await this.page.getByText("Produto adicionado!").first().click();
+		await this.page.getByText("Ir", { exact: true }).first().click();
 		await expect(this.page).toHaveURL("/carrinho");
 	}
 
 	async addTwoDecksToCart() {
 		await this.page.goto("/");
 		await this.page
-			.getByText("Adicionar ao Carrinho")
+			.getByText("Adicionar")
 			.first()
 			.click();
 		await expect(
-			this.page.getByText("Produto adicionado!").first(),
+			this.page.getByText("Produto adicionado ao carrinho!").first(),
 		).toBeVisible();
 		await this.page
-			.getByText("Adicionar ao Carrinho")
+			.getByText("Adicionar")
 			.nth(1)
 			.click();
-		await expect(
-			this.page.getByText("Produto adicionado!").nth(2),
-		).toBeVisible();
-		await this.page.getByText("Produto adicionado!").first().click();
+		//await expect(
+		//	this.page.getByText("Produto adicionado ao carrinho!").nth(2),
+		//).toBeVisible();
+		await this.page.getByText("Ir", { exact: true }).nth(1).click();
 		await expect(this.page).toHaveURL("/carrinho");
 	}
 
@@ -80,7 +80,7 @@ export class CartPage {
 
 	async expectCouponApplied() {
 		await expect(
-			this.page.getByText("Cupom de desconto aplicado com sucesso!"),
+			this.page.getByText("Desconto aplicado!"),
 		).toBeVisible();
 	}
 

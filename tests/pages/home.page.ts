@@ -37,7 +37,7 @@ export class HomePage {
 
 	async expectNoResults() {
 		await expect(
-			this.page.getByText("Nenhum flashcard encontrado."),
+			this.page.getByText("Nenhum resultado encontrado"),
 		).toBeVisible();
 	}
 
