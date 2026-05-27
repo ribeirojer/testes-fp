@@ -50,11 +50,7 @@ test.describe("Registro @auth", () => {
 		await registerPage.goto();
 		const id = Math.floor(Math.random() * 1000000);
 
-		await registerPage.register(
-			`Teste-${id}`,
-			TEST_EMAIL,
-			TEST_PASSWORD,
-		);
+		await registerPage.register(`Teste-${id}`, TEST_EMAIL, TEST_PASSWORD);
 		await registerPage.expectSuccess();
 	});
 });

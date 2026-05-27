@@ -18,10 +18,7 @@ export class CartPage {
 
 	async addFirstDeckToCart() {
 		await this.page.goto("/");
-		await this.page
-			.getByText("Adicionar")
-			.first()
-			.click();
+		await this.page.getByText("Adicionar").first().click();
 		await expect(
 			this.page.getByText("Ir", { exact: true }).first(),
 		).toBeVisible();
@@ -35,17 +32,11 @@ export class CartPage {
 
 	async addTwoDecksToCart() {
 		await this.page.goto("/");
-		await this.page
-			.getByText("Adicionar")
-			.first()
-			.click();
+		await this.page.getByText("Adicionar").first().click();
 		await expect(
 			this.page.getByText("Produto adicionado ao carrinho!").first(),
 		).toBeVisible();
-		await this.page
-			.getByText("Adicionar")
-			.nth(1)
-			.click();
+		await this.page.getByText("Adicionar").nth(1).click();
 		//await expect(
 		//	this.page.getByText("Produto adicionado ao carrinho!").nth(2),
 		//).toBeVisible();
@@ -79,9 +70,7 @@ export class CartPage {
 	}
 
 	async expectCouponApplied() {
-		await expect(
-			this.page.getByText("Desconto aplicado!"),
-		).toBeVisible();
+		await expect(this.page.getByText("Desconto aplicado!")).toBeVisible();
 	}
 
 	async expectCouponError() {
