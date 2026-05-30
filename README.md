@@ -34,11 +34,11 @@ TEST_EMAIL=seu@email.com
 TEST_PASSWORD=sua-senha
 ```
 
-| Variável       | Descrição                    | Padrão                                           |
-|----------------|------------------------------|--------------------------------------------------|
-| `BASE_URL`     | URL base da aplicação        | `https://flashcards-premium.vercel.app`          |
-| `TEST_EMAIL`   | Email usado nos testes       | `teste@exemplo.com`                              |
-| `TEST_PASSWORD`| Senha usada nos testes       | `Teste@1234`                                     |
+| Variável        | Descrição              | Padrão                                  |
+| --------------- | ---------------------- | --------------------------------------- |
+| `BASE_URL`      | URL base da aplicação  | `https://flashcards-premium.vercel.app` |
+| `TEST_EMAIL`    | Email usado nos testes | `teste@exemplo.com`                     |
+| `TEST_PASSWORD` | Senha usada nos testes | `Teste@1234`                            |
 
 ## Lint e formatação
 
